@@ -1,14 +1,23 @@
 import requests
 from bs4 import BeautifulSoup
+from urllib.parse import urlparse
+import os
+import re
 
 class PlayerDataScraper:
     def __init__(self, name):
+        is_url = bool(re.match(r'^https?://', name))
+        if is_url:
+            parsed_url = urlparse(name)
+            name = os.path.basename(parsed_url.path).replace('_', ' ')
         self.name = name
-        self.url = f"https://en.wikipedia.org/wiki/{name}"
+        self.url = f"https://en.wikipedia.org/wiki/{name.replace(' ', '_')}"
         self.data = []
         self.int_name = "International career"
         self.pers_name = "Personal information"
         self.men_name = "Managerial career"
+
+
 
     def scrape_data(self):
         response = requests.get(self.url)
@@ -37,6 +46,10 @@ class PlayerDataScraper:
                 self.men_name = "Signature"
             else:
                 self.men_name = self.men_name
+
+
+
+
 
 
 
@@ -90,8 +103,8 @@ class PlayerDataScraper:
 def main():
     player_scraper = PlayerDataScraper('Cristiano Ronaldo')
     player_scraper.scrape_data()
-    player_scraper.write_to_personal_information()
-    player_scraper.write_to_senior_career()
+    #player_scraper.write_to_personal_information()
+    #player_scraper.write_to_senior_career()
     #player_scraper.write_to_international_career()
     #player_scraper.write_to_managerial_career()
 

@@ -2,6 +2,9 @@ import logging
 import telebot
 from quizz import PlayerDataScraper
 from config import BOT_TOKEN  # Import BOT_TOKEN from config.py
+import re
+from urllib.parse import urlparse
+import os
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -52,6 +55,10 @@ def handle_message(message):
     if message.text.startswith('/'):
         bot.reply_to(message, "Sorry, I don't understand that command. Please use /help to see available commands.")
         return
+    is_url = bool(re.match(r'^https?://', message.text))
+    if is_url:
+        parsed_url = urlparse(message.text)
+        message.text = os.path.basename(parsed_url.path).replace('_', ' ')
 
     player_name = message.text
     player_scraper = PlayerDataScraper(player_name)
@@ -61,6 +68,7 @@ def handle_message(message):
         player_scraper.write_to_personal_information()
         player_scraper.write_to_senior_career()
         player_scraper.write_to_international_career()
+        #player_scraper.write_to_managerial_career()
     except Exception as e:
         bot.reply_to(message, f"An error occurred while processing the data: {str(e)}")
         return
